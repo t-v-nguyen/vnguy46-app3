@@ -15,14 +15,14 @@ public class TestGrid : MonoBehaviour
     {
         if(Input.GetMouseButtonDown(0))
         {
+
             pathfinding.GetGrid().GetXY(GetMouseWorldPosition(), out int x, out int y);
             List<PathNode> path = pathfinding.FindPath(0,0,x,y);
-            print(path);
             if (path != null)
             {
-                for(int i=0;i<path.Count;i++)
+                for(int i=0;i<path.Count-1;i++)
                 {
-                    Debug.DrawLine(new Vector3(path[i].x, path[i].y) * 10f + Vector3.one * 5f, new Vector3(path[i+1].x, path[i+1].y));
+                    Debug.DrawLine(new Vector3(path[i].x, path[i].y) * 10f + Vector3.one * 5f, new Vector3(path[i+1].x, path[i+1].y) * 10f + Vector3.one * 5f, Color.green, 100f);
                 }
             }
         }
