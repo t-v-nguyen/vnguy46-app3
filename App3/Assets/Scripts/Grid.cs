@@ -37,7 +37,7 @@ public class Grid<TGridObject>
             Debug.DrawLine(GetWorldPosition(width, 0), GetWorldPosition(width, height), Color.white, 100f);
         }
     }
-    public Grid(int width, int height, float cellSize, Vector3 origin, Func<TGridObject> createGridObject)
+    public Grid(int width, int height, float cellSize, Vector3 origin, Func<Grid<TGridObject>, int, int, TGridObject> createGridObject)
     {
         this.width = width;
         this.height = height;
@@ -51,7 +51,7 @@ public class Grid<TGridObject>
         {
             for (int y = 0; y < height; y++)
             {
-                gridArray[x,y] = createGridObject();
+                gridArray[x,y] = createGridObject(this, x, y);
             }
         }
 
@@ -70,6 +70,16 @@ public class Grid<TGridObject>
             Debug.DrawLine(GetWorldPosition(0, height), GetWorldPosition(width, height), Color.white, 100f);
             Debug.DrawLine(GetWorldPosition(width, 0), GetWorldPosition(width, height), Color.white, 100f);
         }
+    }
+
+    public int GetHeight()
+    {
+        return this.height;
+    }
+
+    public int GetWidth()
+    {
+        return this.width;
     }
 
     public static TextMesh CreateTextMesh(string text, Color color, Transform parent = null, Vector3 localPosition = default(Vector3), int fontSize = 40, TextAnchor textAnchor = TextAnchor.UpperLeft, TextAlignment textAlignment = TextAlignment.Left, int sortingOrder = 5000)
@@ -93,7 +103,7 @@ public class Grid<TGridObject>
         return new Vector3(x, y) * cellSize + origin;
     }
 
-    private void GetXY(Vector3 worldPosition, out int x, out int y)
+    public void GetXY(Vector3 worldPosition, out int x, out int y)
     {
         x = Mathf.FloorToInt((worldPosition - origin).x / cellSize);
         y = Mathf.FloorToInt((worldPosition - origin).y / cellSize);
