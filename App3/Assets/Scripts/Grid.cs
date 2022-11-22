@@ -82,6 +82,11 @@ public class Grid<TGridObject>
         return this.width;
     }
 
+    public float GetCellSize()
+    {
+        return this.cellSize;
+    }
+
     public static TextMesh CreateTextMesh(string text, Color color, Transform parent = null, Vector3 localPosition = default(Vector3), int fontSize = 40, TextAnchor textAnchor = TextAnchor.UpperLeft, TextAlignment textAlignment = TextAlignment.Left, int sortingOrder = 5000)
     {
         GameObject go = new GameObject("Grid_Outline", typeof(TextMesh));
@@ -98,7 +103,7 @@ public class Grid<TGridObject>
         return textMesh;
     }
 
-    private Vector3 GetWorldPosition(int x, int y)
+    public Vector3 GetWorldPosition(int x, int y)
     {
         return new Vector3(x, y) * cellSize + origin;
     }
