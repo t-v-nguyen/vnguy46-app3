@@ -65,13 +65,13 @@ public class UnitMovement : MonoBehaviour
             else
             {
                 currentPathIndex++;
-                if (CheckEnemiesInRange(unit.team == Teams.Player ? Teams.Enemy : Teams.Player)) // check for enemies
-                {
-                    Debug.Log("Enemy Found");
-                    isMoving = false;
-                    pathVectorList = null;
-                }
-                else if (currentPathIndex >= pathVectorList.Count) // reached location
+                // if (CheckEnemiesInRange(unit.team == Teams.Player ? Teams.Enemy : Teams.Player)) // check for enemies
+                // {
+                //     Debug.Log("Enemy Found");
+                //     isMoving = false;
+                //     pathVectorList = null;
+                // }
+                if (currentPathIndex >= pathVectorList.Count) // reached location
                 {
                     pathVectorList = null;
                     isMoving = false;
@@ -116,6 +116,7 @@ public class UnitMovement : MonoBehaviour
             Pathfinding.Instance.GetNode(pathVectorList[1]).SetIsOccupied(true);
             Pathfinding.Instance.GetNode(pathVectorList[1]).unit = unit;
             pathVectorList.RemoveAt(0);
+            pathVectorList.RemoveAt(pathVectorList.Count-1);
         }
     }
 
@@ -141,8 +142,8 @@ public class UnitMovement : MonoBehaviour
                 unit.target = enemy;
             }
         }
-        PathNode closestUnoccupiedNode = Pathfinding.Instance.GetClosestAdjacentUnoccupiedNode(unit.currentNode, unit.target.currentNode);
-        SetTargetPosition(Pathfinding.Instance.GetWorldPosition(closestUnoccupiedNode));
+        // PathNode closestUnoccupiedNode = Pathfinding.Instance.GetClosestAdjacentUnoccupiedNode(unit.currentNode, unit.target.currentNode);
+        SetTargetPosition(Pathfinding.Instance.GetWorldPosition(unit.target.currentNode));
     }
 
     protected bool CheckEnemiesInRange(Teams oppositeTeam)

@@ -75,7 +75,7 @@ public class Pathfinding
             foreach (PathNode neighbour in GetNeighbourList(currentNode))
             {
                 if (closeList.Contains(neighbour)) continue;
-                if (neighbour.isOccupied)
+                if (neighbour != endNode && neighbour.isOccupied )
                 {
                     closeList.Add(neighbour);
                     continue;
