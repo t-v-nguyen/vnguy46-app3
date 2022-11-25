@@ -37,9 +37,4 @@ public class PathNode
     {
         this.isOccupied = occupied;
     }
-
-    public bool GetIsOccupied()
-    {
-        return this.isOccupied;
-    }
 }

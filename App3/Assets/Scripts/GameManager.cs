@@ -7,7 +7,6 @@ public class GameManager : MonoBehaviour
     public List<Unit> allUnits = new List<Unit>();
     public List<Unit> playerUnits = new List<Unit>();
     public List<Unit> enemyUnits = new List<Unit>();
-    public Dictionary<Teams, List<Unit>> unitsOnField = new Dictionary<Teams, List<Unit>>();
     int level = 1;
     private Pathfinding pathfinding;
 
@@ -36,11 +35,9 @@ public class GameManager : MonoBehaviour
 
     private void InstantiatePlayerUnits()
     {
-        unitsOnField.Add(Teams.Player, new List<Unit>());
         for (int i = 0; i < level; i++)
         {
             Unit newUnit = Instantiate(allUnits[0]);
-            unitsOnField[Teams.Player].Add(newUnit);
             playerUnits.Add(newUnit);
 
             newUnit.Setup(Teams.Player, pathfinding.GetRandomUnoccupiedNode(Teams.Player));
@@ -51,11 +48,9 @@ public class GameManager : MonoBehaviour
 
     private void InstantiateEnemyUnits()
     {
-        unitsOnField.Add(Teams.Enemy, new List<Unit>());
-        for(int i=0;i<3;i++)
+        for(int i=0;i<1;i++)
         {
             Unit newUnit = Instantiate(allUnits[0]);
-            unitsOnField[Teams.Enemy].Add(newUnit);
             enemyUnits.Add(newUnit);
 
             newUnit.Setup(Teams.Enemy, pathfinding.GetRandomUnoccupiedNode(Teams.Enemy));
@@ -70,6 +65,20 @@ public class GameManager : MonoBehaviour
     public List<Unit> GetPlayerUnits()
     {
         return playerUnits;
+    }
+
+    public void RemoveUnit(Unit unit)
+    {
+        if(unit.team == Teams.Player)
+        {
+            playerUnits.Remove(unit);
+        }
+        if(unit.team == Teams.Enemy)
+        {
+            enemyUnits.Remove(unit);
+        }
+
+        Destroy(unit.gameObject);
     }
 }
 
