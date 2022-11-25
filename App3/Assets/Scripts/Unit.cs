@@ -4,10 +4,13 @@ using UnityEngine;
 
 public class Unit : UnitMovement
 {
+    private GameManager gameManager;
     private UnitMovement unitMovement;
-    public int damage = 1;
-    public int health = 100;
-    public int range = 1;
+    public GameObject healthBar;
+    public int damage = 10;
+    public int currentHealth = 100;
+    public int maxHealth = 100;
+    public int range = 60;
     public float AS = 1f; // Attack speed
     public float MS = 20f; // Movement speed
     public Teams team;
@@ -21,6 +24,7 @@ public class Unit : UnitMovement
     private void Start()
     {
         unitMovement = GetComponent<UnitMovement>();
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
     }
 
     public void Setup(Teams team, PathNode spawnNode)
@@ -29,12 +33,12 @@ public class Unit : UnitMovement
         this.currentNode = spawnNode;
         transform.position = Pathfinding.Instance.GetWorldPosition(currentNode);
         currentNode.SetIsOccupied(true);
+        maxHealth = currentHealth;
     }
 
     protected void Attack()
     {
         if (canAttack == false) return;
-
         timeUntilAttack = 1 / AS;
         StartCoroutine(AttackCooldown());
 
@@ -48,16 +52,30 @@ public class Unit : UnitMovement
         }
     }
 
+    private void TakeDamage(int damage)
+    {
+        currentHealth -= damage;
+        float scale = ((float)currentHealth)/maxHealth;
+        healthBar.transform.localScale = new Vector3(scale, 1, 0);
+        if(currentHealth <= 0)
+        {
+            gameManager.RemoveUnit(this);
+        }
+    }
+
     public void Update()
     {
         if (target == null)
         {
             unitMovement.FindClosestTarget(team);
         }
-
         if (targetInRange && !isMoving)
         {
-
+            if (canAttack)
+            {
+                Attack();
+                target.TakeDamage(damage);
+            }
         }
         else
         {
