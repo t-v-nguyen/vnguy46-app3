@@ -13,7 +13,6 @@ public class PathNode
 
     public PathNode cameFromNode;
     public bool isOccupied;
-    public Unit unit;
     public int cellNum;
 
     public PathNode(Grid<PathNode> grid, int x, int y)
@@ -22,7 +21,6 @@ public class PathNode
         this.x = x;
         this.y = y;
         this.isOccupied = false;
-        this.unit = null;
     }
 
     public override string ToString()

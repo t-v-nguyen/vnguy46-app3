@@ -52,7 +52,7 @@ public class GameManager : MonoBehaviour
     private void InstantiateEnemyUnits()
     {
         unitsOnField.Add(Teams.Enemy, new List<Unit>());
-        for(int i=0;i<1;i++)
+        for(int i=0;i<3;i++)
         {
             Unit newUnit = Instantiate(allUnits[0]);
             unitsOnField[Teams.Enemy].Add(newUnit);

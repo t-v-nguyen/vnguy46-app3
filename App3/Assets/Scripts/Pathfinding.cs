@@ -206,28 +206,20 @@ public class Pathfinding
         return neighbourList;
     }
 
-    private List<PathNode> GetDirectNeighbourList(PathNode currentNode)
+    public bool IsNeighbourOccupied(PathNode targetNode)
     {
-        List<PathNode> neighbourList = new List<PathNode>();
-
-        if (currentNode.x - 1 >= 0)
+        bool allOccupied = true;
+        List<PathNode> neighbourList = GetNeighbourList(targetNode);
+        foreach(PathNode neighbour in neighbourList)
         {
-            neighbourList.Add(GetNode(currentNode.x - 1, currentNode.y));
+            if(!neighbour.isOccupied) allOccupied = false;
         }
-        if (currentNode.x + 1 < grid.GetWidth())
-        {
-            neighbourList.Add(GetNode(currentNode.x + 1, currentNode.y));
-        }
-        if (currentNode.y - 1 >= 0) neighbourList.Add(GetNode(currentNode.x, currentNode.y - 1));
-        if (currentNode.y + 1 < grid.GetHeight()) neighbourList.Add(GetNode(currentNode.x, currentNode.y + 1));
-
-        return neighbourList;
+        return allOccupied;
     }
 
     private List<PathNode> CalculatePath(PathNode endNode)
     {
         List<PathNode> path = new List<PathNode>();
-        path.Add(endNode);
         PathNode currentNode = endNode;
         while (currentNode.cameFromNode != null)
         {
@@ -246,22 +238,6 @@ public class Pathfinding
     public Vector3 GetWorldPosition(PathNode node)
     {
         return grid.GetWorldPosition(node.x, node.y) + new Vector3(grid.GetCellSize() / 2, grid.GetCellSize() / 2);
-    }
-
-    public PathNode GetClosestAdjacentUnoccupiedNode(PathNode start, PathNode target)
-    {
-        List<PathNode> neighbourList = GetDirectNeighbourList(target);
-        float minDistance = float.PositiveInfinity;
-        PathNode closestNeighbour = null;
-        foreach (PathNode neighbour in neighbourList)
-        {
-            if (!neighbour.isOccupied && Vector3.Distance(GetWorldPosition(start), GetWorldPosition(neighbour)) < minDistance)
-            {
-                minDistance = Vector3.Distance(GetWorldPosition(start), GetWorldPosition(neighbour));
-                closestNeighbour = neighbour;
-            }
-        }
-        return closestNeighbour;
     }
 
 }

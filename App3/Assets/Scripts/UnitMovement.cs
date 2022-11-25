@@ -5,97 +5,46 @@ using UnityEngine;
 public class UnitMovement : MonoBehaviour
 {
     private Unit unit;
-    private int currentPathIndex;
     public List<Vector3> pathVectorList;
-    private bool isMoving;
     private List<Unit> opposingUnits = new List<Unit>();
     private GameManager gameManager;
+    public Vector3 destination;
 
     void Start()
     {
         unit = GetComponent<Unit>();
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
-        FindClosestTarget(unit.GetTeam());
     }
 
-
-    // Update is called once per frame
-    void Update()
+    private bool MoveToNode(Vector3 location)
     {
-        if (unit.target == null)
+        Vector3 moveDir = (location - transform.position);
+        if (moveDir.sqrMagnitude <= 0.05f)
         {
-            FindClosestTarget(unit.GetTeam());
+            transform.position = location;
+            return true;
         }
-        HandleMovement();
-        // check if moving and attacking
-        // if moving then move towards target
-        // if attacking dont move
-        // if not moving or attacking find new target
-        // if(isMoving)
-        // {
-        //     HandleMovement();
-        // }
-        // else if(targetInRange && !isMoving)
-        // {
-        //     if(canAttack)
-        //     {
-        //         Attack();
-        //         Debug.Log("Attacked");
-        //     }
-        // }
-        // else
-        // {
-        //     FindClosestTarget(team);
-        // }
+        transform.position = transform.position + moveDir.normalized * unit.MS * Time.deltaTime;
+        return false;
     }
 
-    private void HandleMovement()
+    public void GetInRange()
     {
-        if (pathVectorList != null)
+        if (unit.target == null) 
         {
-            Vector3 targetPos = pathVectorList[currentPathIndex];
+            return;
+        }
 
-            if (Vector3.Distance(transform.position, targetPos) > 0.5f)
-            {
-                Vector3 moveDir = (targetPos - transform.position).normalized;
+        if (!unit.isMoving)
+        {
+            SetTargetPosition(Pathfinding.Instance.GetWorldPosition(unit.target.currentNode));
+        }
 
-                float distanceBefore = Vector3.Distance(transform.position, targetPos);
-                transform.position = transform.position + moveDir * unit.MS * Time.deltaTime;
-            }
-            else
-            {
-                currentPathIndex++;
-                // if (CheckEnemiesInRange(unit.team == Teams.Player ? Teams.Enemy : Teams.Player)) // check for enemies
-                // {
-                //     Debug.Log("Enemy Found");
-                //     isMoving = false;
-                //     pathVectorList = null;
-                // }
-                if (currentPathIndex >= pathVectorList.Count) // reached location
-                {
-                    pathVectorList = null;
-                    isMoving = false;
-                }
-                else if (Pathfinding.Instance.GetNode(pathVectorList[currentPathIndex]) == unit.target.GetNode()) // next node contains target
-                {
-                    isMoving = false;
-                    pathVectorList = null;
-                }
-                else if (Pathfinding.Instance.GetNode(pathVectorList[currentPathIndex]).GetIsOccupied()) // next node is already occupied
-                {
-                    FindClosestTarget(unit.team);
-                }
-                else // next node is empty
-                {
-                    unit.currentNode.SetIsOccupied(false);
-                    Pathfinding.Instance.GetNode(pathVectorList[currentPathIndex - 1]).unit = null;
-                    unit.currentNode = Pathfinding.Instance.GetNode(pathVectorList[currentPathIndex]);
-                    unit.currentNode.SetIsOccupied(true);
-                    Pathfinding.Instance.GetNode(pathVectorList[currentPathIndex]).unit = unit;
-                }
-            }
-
-
+        unit.isMoving = !MoveToNode(destination);
+        if(!unit.isMoving)
+        {
+            unit.currentNode.SetIsOccupied(false);
+            unit.currentNode = Pathfinding.Instance.GetNode(destination);
         }
     }
 
@@ -106,77 +55,38 @@ public class UnitMovement : MonoBehaviour
 
     public void SetTargetPosition(Vector3 targetPos)
     {
-        currentPathIndex = 0;
-        isMoving = true;
         pathVectorList = Pathfinding.Instance.FindPath(GetPosition(), targetPos);
-        if (pathVectorList != null && pathVectorList.Count > 1)
-        {
-            Pathfinding.Instance.GetNode(pathVectorList[0]).SetIsOccupied(false);
-            Pathfinding.Instance.GetNode(pathVectorList[0]).unit = null;
-            Pathfinding.Instance.GetNode(pathVectorList[1]).SetIsOccupied(true);
-            Pathfinding.Instance.GetNode(pathVectorList[1]).unit = unit;
-            pathVectorList.RemoveAt(0);
-            pathVectorList.RemoveAt(pathVectorList.Count-1);
-        }
+
+        if (pathVectorList == null || pathVectorList.Count <= 1) return;
+
+        if (Pathfinding.Instance.GetNode(pathVectorList[1]).isOccupied) return;
+
+        Pathfinding.Instance.GetNode(pathVectorList[0]).SetIsOccupied(false);
+        Pathfinding.Instance.GetNode(pathVectorList[1]).SetIsOccupied(true);
+        destination = pathVectorList[1];
     }
 
-    protected void FindClosestTarget(Teams team)
+    public void FindClosestTarget(Teams team)
     {
-        float minDistance;
+        float minDistance = float.PositiveInfinity;
+        Unit targetFound = null;
         if (team == Teams.Player)
         {
             opposingUnits = gameManager.GetEnemyUnits();
-            minDistance = Vector3.Distance(transform.position, opposingUnits[0].transform.position);
         }
         else
         {
             opposingUnits = gameManager.GetPlayerUnits();
-            minDistance = Vector3.Distance(transform.position, opposingUnits[0].transform.position);
         }
 
         foreach (Unit enemy in opposingUnits)
         {
-            if (Vector3.Distance(transform.position, enemy.transform.position) <= minDistance)
+            if (Vector3.Distance(transform.position, enemy.transform.position) <= minDistance && !Pathfinding.Instance.IsNeighbourOccupied(enemy.currentNode))
             {
                 minDistance = Vector3.Distance(transform.position, enemy.transform.position);
-                unit.target = enemy;
+                targetFound = enemy;
             }
         }
-        // PathNode closestUnoccupiedNode = Pathfinding.Instance.GetClosestAdjacentUnoccupiedNode(unit.currentNode, unit.target.currentNode);
-        SetTargetPosition(Pathfinding.Instance.GetWorldPosition(unit.target.currentNode));
-    }
-
-    protected bool CheckEnemiesInRange(Teams oppositeTeam)
-    {
-        bool enemyInRange = false;
-        if (unit.currentNode.x - 1 >= 0)
-        {
-            if (Pathfinding.Instance.GetNode(unit.currentNode.x - 1, unit.currentNode.y).isOccupied && Pathfinding.Instance.GetNode(unit.currentNode.x - 1, unit.currentNode.y).unit.team == oppositeTeam)
-            {
-                enemyInRange = true;
-            }
-        }
-        else if (unit.currentNode.x + 1 < Pathfinding.Instance.GetGrid().GetWidth())
-        {
-            if (Pathfinding.Instance.GetNode(unit.currentNode.x + 1, unit.currentNode.y).isOccupied && Pathfinding.Instance.GetNode(unit.currentNode.x + 1, unit.currentNode.y).unit.team == oppositeTeam)
-            {
-                enemyInRange = true;
-            }
-        }
-        else if (unit.currentNode.y - 1 >= 0)
-        {
-            if (Pathfinding.Instance.GetNode(unit.currentNode.x, unit.currentNode.y-1).isOccupied && Pathfinding.Instance.GetNode(unit.currentNode.x, unit.currentNode.y - 1).unit.team == oppositeTeam)
-            {
-                enemyInRange = true;
-            }
-        }
-        else if (unit.currentNode.y + 1 < Pathfinding.Instance.GetGrid().GetHeight())
-        {
-            if (Pathfinding.Instance.GetNode(unit.currentNode.x, unit.currentNode.y+1).isOccupied && Pathfinding.Instance.GetNode(unit.currentNode.x, unit.currentNode.y + 1).unit.team == oppositeTeam)
-            {
-                enemyInRange = true;
-            }
-        }
-        return enemyInRange;
+        unit.target = targetFound;
     }
 }
