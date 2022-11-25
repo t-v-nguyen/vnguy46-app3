@@ -30,7 +30,7 @@ public class UnitMovement : MonoBehaviour
 
     public void GetInRange()
     {
-        if (unit.target == null) 
+        if (unit.target == null)
         {
             return;
         }
@@ -41,9 +41,16 @@ public class UnitMovement : MonoBehaviour
         }
 
         unit.isMoving = !MoveToNode(destination);
-        if(!unit.isMoving)
+        if (!unit.isMoving)
         {
-            unit.currentNode.SetIsOccupied(false);
+            if (pathVectorList != null && pathVectorList[0] == destination)
+            {
+                unit.currentNode.SetIsOccupied(true);
+            }
+            else
+            {
+                unit.currentNode.SetIsOccupied(false);
+            }
             unit.currentNode = Pathfinding.Instance.GetNode(destination);
         }
     }
@@ -61,7 +68,6 @@ public class UnitMovement : MonoBehaviour
 
         if (Pathfinding.Instance.GetNode(pathVectorList[1]).isOccupied) return;
 
-        Pathfinding.Instance.GetNode(pathVectorList[0]).SetIsOccupied(false);
         Pathfinding.Instance.GetNode(pathVectorList[1]).SetIsOccupied(true);
         destination = pathVectorList[1];
     }
