@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class Unit : UnitMovement
 {
-    private GameManager gameManager;
     private UnitMovement unitMovement;
     public Traits trait;
     public Races race;
@@ -23,11 +22,11 @@ public class Unit : UnitMovement
     protected bool canAttack = true;
     private float timeUntilAttack;
     protected bool targetInRange => target != null && Vector3.Distance(this.transform.position, target.transform.position) <= range;
+    
 
     private void Start()
     {
         unitMovement = GetComponent<UnitMovement>();
-        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
     }
 
     public void Setup(Teams team, PathNode spawnNode)
@@ -62,7 +61,7 @@ public class Unit : UnitMovement
         healthBar.transform.localScale = new Vector3(scale, 1, 0);
         if(currentHealth <= 0)
         {
-            gameManager.RemoveUnit(this);
+            GameManager.Instance.RemoveUnit(this);
         }
     }
 

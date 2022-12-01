@@ -8,25 +8,51 @@ public class GameManager : MonoBehaviour
     public List<Unit> heroUnits = new List<Unit>();
     public List<Unit> playerUnits = new List<Unit>();
     public List<Unit> enemyUnits = new List<Unit>();
-    public int level = 1;
+    public int heroLevel = 1;
+    public int round = 1;
+    public int currency = 0;
     private Pathfinding pathfinding;
     public GameObject square;
+    private GameObject heroSelectPanel;
+    private GameObject playFieldPanel;
 
-    // Start is called before the first frame update
+    public static GameManager Instance { get; private set; }
+    private void Awake()
+    {
+        // If there is an instance, and it's not me, delete myself.
+
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+        }
+        else
+        {
+            Instance = this;
+        }
+    }
+
     void Start()
     {
         pathfinding = new Pathfinding(8, 8, 20f);
+        heroLevel = 1;
+        round = 1;
+        currency = 0;
+        heroSelectPanel = GameObject.Find("HeroSelection");
+        playFieldPanel = GameObject.Find("PlayField");
+        heroSelectPanel.SetActive(true);
+        playFieldPanel.SetActive(false);
+
     }
 
     private void DrawBoard()
     {
-        for(int x=0; x<8; x++)
+        for (int x = 0; x < 8; x++)
         {
-            for(int y=0;y<8;y++)
+            for (int y = 0; y < 8; y++)
             {
-                GameObject go = GameObject.Instantiate(square,new Vector3((float)x*20 + 10, (float)y*20 + 10),new Quaternion(0,0,0,0),square.transform.parent);
+                GameObject go = GameObject.Instantiate(square, new Vector3((float)x * 20 + 10, (float)y * 20 + 10), new Quaternion(0, 0, 0, 0), square.transform.parent);
                 SpriteRenderer sr = go.GetComponent<SpriteRenderer>();
-                if((x+y) % 2 == 1)
+                if ((x + y) % 2 == 1)
                 {
                     sr.color = new Color(255f, 255f, 255f, .25f);
                 }
@@ -38,16 +64,6 @@ public class GameManager : MonoBehaviour
             }
         }
     }
-
-    // private void Update()
-    // {
-    //     if(Input.GetMouseButtonDown(0))
-    //     {
-    //         pathfinding.GetGrid().GetXY(GetMouseWorldPosition(), out int x, out int y);
-    //         PathNode node = pathfinding.GetNode(x,y);
-    //         Debug.Log(node.isOccupied);
-    //     }
-    // }
     private static Vector3 GetMouseWorldPosition()
     {
         Vector3 worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -66,11 +82,11 @@ public class GameManager : MonoBehaviour
 
     public void RemoveUnit(Unit unit)
     {
-        if(unit.team == Teams.Player)
+        if (unit.team == Teams.Player)
         {
             playerUnits.Remove(unit);
         }
-        if(unit.team == Teams.Enemy)
+        if (unit.team == Teams.Enemy)
         {
             enemyUnits.Remove(unit);
         }
@@ -83,8 +99,8 @@ public class GameManager : MonoBehaviour
         Unit newUnit = Instantiate(heroUnits[3]);
         playerUnits.Add(newUnit);
         newUnit.Setup(Teams.Player, pathfinding.GetUnoccupiedNode(Teams.Player));
-        GameObject panel = GameObject.Find("HeroSelection");
-        panel.SetActive(false);
+        heroSelectPanel.SetActive(false);
+        playFieldPanel.SetActive(true);
         DrawBoard();
     }
     public void SelectOrcHero()
@@ -92,8 +108,8 @@ public class GameManager : MonoBehaviour
         Unit newUnit = Instantiate(heroUnits[2]);
         playerUnits.Add(newUnit);
         newUnit.Setup(Teams.Player, pathfinding.GetUnoccupiedNode(Teams.Player));
-        GameObject panel = GameObject.Find("HeroSelection");
-        panel.SetActive(false);
+        heroSelectPanel.SetActive(false);
+        playFieldPanel.SetActive(true);
         DrawBoard();
     }
     public void SelectHumanHero()
@@ -101,8 +117,8 @@ public class GameManager : MonoBehaviour
         Unit newUnit = Instantiate(heroUnits[1]);
         playerUnits.Add(newUnit);
         newUnit.Setup(Teams.Player, pathfinding.GetUnoccupiedNode(Teams.Player));
-        GameObject panel = GameObject.Find("HeroSelection");
-        panel.SetActive(false);
+        heroSelectPanel.SetActive(false);
+        playFieldPanel.SetActive(true);
         DrawBoard();
     }
     public void SelectElfHero()
@@ -111,8 +127,8 @@ public class GameManager : MonoBehaviour
         Unit newUnit = Instantiate(heroUnits[0]);
         playerUnits.Add(newUnit);
         newUnit.Setup(Teams.Player, pathfinding.GetUnoccupiedNode(Teams.Player));
-        GameObject panel = GameObject.Find("HeroSelection");
-        panel.SetActive(false);
+        heroSelectPanel.SetActive(false);
+        playFieldPanel.SetActive(true);
         DrawBoard();
     }
 }
