@@ -4,57 +4,54 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public List<Unit> allUnits = new List<Unit>();
+    public List<Unit> purchasableUnits = new List<Unit>();
+    public List<Unit> heroUnits = new List<Unit>();
     public List<Unit> playerUnits = new List<Unit>();
     public List<Unit> enemyUnits = new List<Unit>();
-    int level = 1;
+    public int level = 1;
     private Pathfinding pathfinding;
+    public GameObject square;
 
     // Start is called before the first frame update
     void Start()
     {
         pathfinding = new Pathfinding(8, 8, 20f);
-        InstantiatePlayerUnits();
-        InstantiateEnemyUnits();
     }
 
-    private void Update()
+    private void DrawBoard()
     {
-        if(Input.GetMouseButtonDown(0))
+        for(int x=0; x<8; x++)
         {
-            pathfinding.GetGrid().GetXY(GetMouseWorldPosition(), out int x, out int y);
-            PathNode node = pathfinding.GetNode(x,y);
-            Debug.Log(node.isOccupied);
+            for(int y=0;y<8;y++)
+            {
+                GameObject go = GameObject.Instantiate(square,new Vector3((float)x*20 + 10, (float)y*20 + 10),new Quaternion(0,0,0,0),square.transform.parent);
+                SpriteRenderer sr = go.GetComponent<SpriteRenderer>();
+                if((x+y) % 2 == 1)
+                {
+                    sr.color = new Color(255f, 255f, 255f, .25f);
+                }
+                else
+                {
+                    sr.color = new Color(0f, 0f, 0f, .25f);
+                }
+                go.SetActive(true);
+            }
         }
     }
+
+    // private void Update()
+    // {
+    //     if(Input.GetMouseButtonDown(0))
+    //     {
+    //         pathfinding.GetGrid().GetXY(GetMouseWorldPosition(), out int x, out int y);
+    //         PathNode node = pathfinding.GetNode(x,y);
+    //         Debug.Log(node.isOccupied);
+    //     }
+    // }
     private static Vector3 GetMouseWorldPosition()
     {
         Vector3 worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         return worldPos;
-    }
-
-    private void InstantiatePlayerUnits()
-    {
-        for (int i = 0; i < level; i++)
-        {
-            Unit newUnit = Instantiate(allUnits[0]);
-            playerUnits.Add(newUnit);
-
-            newUnit.Setup(Teams.Player, pathfinding.GetRandomUnoccupiedNode(Teams.Player));
-
-
-        }
-    }
-
-    private void InstantiateEnemyUnits()
-    {
-        for(int i=0;i<1;i++)
-        {
-            Unit newUnit = Instantiate(allUnits[0]);
-            enemyUnits.Add(newUnit);
-
-            newUnit.Setup(Teams.Enemy, pathfinding.GetRandomUnoccupiedNode(Teams.Enemy));
-        }
     }
 
     public List<Unit> GetEnemyUnits()
@@ -80,10 +77,65 @@ public class GameManager : MonoBehaviour
 
         Destroy(unit.gameObject);
     }
+
+    public void SelectVampireHero()
+    {
+        Unit newUnit = Instantiate(heroUnits[3]);
+        playerUnits.Add(newUnit);
+        newUnit.Setup(Teams.Player, pathfinding.GetUnoccupiedNode(Teams.Player));
+        GameObject panel = GameObject.Find("HeroSelection");
+        panel.SetActive(false);
+        DrawBoard();
+    }
+    public void SelectOrcHero()
+    {
+        Unit newUnit = Instantiate(heroUnits[2]);
+        playerUnits.Add(newUnit);
+        newUnit.Setup(Teams.Player, pathfinding.GetUnoccupiedNode(Teams.Player));
+        GameObject panel = GameObject.Find("HeroSelection");
+        panel.SetActive(false);
+        DrawBoard();
+    }
+    public void SelectHumanHero()
+    {
+        Unit newUnit = Instantiate(heroUnits[1]);
+        playerUnits.Add(newUnit);
+        newUnit.Setup(Teams.Player, pathfinding.GetUnoccupiedNode(Teams.Player));
+        GameObject panel = GameObject.Find("HeroSelection");
+        panel.SetActive(false);
+        DrawBoard();
+    }
+    public void SelectElfHero()
+    {
+        Debug.Log("Elf");
+        Unit newUnit = Instantiate(heroUnits[0]);
+        playerUnits.Add(newUnit);
+        newUnit.Setup(Teams.Player, pathfinding.GetUnoccupiedNode(Teams.Player));
+        GameObject panel = GameObject.Find("HeroSelection");
+        panel.SetActive(false);
+        DrawBoard();
+    }
 }
 
 public enum Teams
 {
     Player,
     Enemy
+}
+
+public enum Races
+{
+    ELF,
+    HUMAN,
+    ORC,
+    VAMPIRE
+}
+
+public enum Traits
+{
+    WARRIOR,
+    RANGER,
+    DRUID,
+    KNIGHT,
+    HERO
 }

@@ -55,7 +55,7 @@ public class Grid<TGridObject>
             }
         }
 
-        bool showDebug = true;
+        bool showDebug = false;
         if (showDebug)
         {
             for (int x = 0; x < width; x++)

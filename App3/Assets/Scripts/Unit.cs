@@ -6,9 +6,12 @@ public class Unit : UnitMovement
 {
     private GameManager gameManager;
     private UnitMovement unitMovement;
+    public Traits trait;
+    public Races race;
+    public int cost;
     public GameObject healthBar;
     public int damage = 10;
-    public int currentHealth = 100;
+    private int currentHealth = 100;
     public int maxHealth = 100;
     public int range = 60;
     public float AS = 1f; // Attack speed
