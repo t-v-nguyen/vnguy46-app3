@@ -1148,7 +1148,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Hero: Respawn or heal to max health at the end of each battle.
+  m_text: 'Hero: Respawn/Heal to max health at the end of each battle.
 
     This
     unit can be upgraded.'
@@ -1516,7 +1516,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &601066070
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5124,8 +5124,8 @@ MonoBehaviour:
   m_text: '4) During Round Prep Units can be rearranged on your half of the board
     by dragging them around.
 
-    Units can be sold by dragging them into the "Remove
-    Unit" Box'
+    Units can be sold by dragging them into the trash
+    icon'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

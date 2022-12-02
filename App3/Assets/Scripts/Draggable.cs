@@ -9,7 +9,8 @@ public class Draggable : MonoBehaviour
     private Vector3 spriteStartPos;
     private Unit unit;
 
-    private void Awake() {
+    private void Awake()
+    {
         unit = GetComponent<Unit>();
     }
 
@@ -18,11 +19,13 @@ public class Draggable : MonoBehaviour
         isDragged = true;
         mouseStartPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         spriteStartPos = transform.localPosition;
+        if(unit.trait != Traits.HERO)GameManager.Instance.trash.SetActive(true);
     }
 
     public void OnMouseDrag()
     {
-        if(isDragged && GameManager.Instance.isRoundPrep)
+
+        if (isDragged && GameManager.Instance.isRoundPrep)
         {
             transform.localPosition = spriteStartPos + (Camera.main.ScreenToWorldPoint(Input.mousePosition) - mouseStartPos);
         }
@@ -31,7 +34,18 @@ public class Draggable : MonoBehaviour
     public void OnMouseUp()
     {
         isDragged = false;
-        if(Pathfinding.Instance.GetNode(transform.localPosition).isOccupied || Pathfinding.Instance.GetNode(transform.localPosition).y >= 4 )
+        
+        if(unit.trait != Traits.HERO && Vector3.Distance(GameManager.Instance.trash.transform.position, transform.position) < 15)
+        {
+            Pathfinding.Instance.GetNode(spriteStartPos).isOccupied = false;
+            GameManager.Instance.RemoveUnit(unit);
+            return;
+        }
+        if (Pathfinding.Instance.GetNode(transform.localPosition) == null)
+        {
+            transform.localPosition = spriteStartPos;
+        }
+        else if (Pathfinding.Instance.GetNode(transform.localPosition).isOccupied || Pathfinding.Instance.GetNode(transform.localPosition).y >= 4)
         {
             transform.localPosition = spriteStartPos;
         }
@@ -42,5 +56,7 @@ public class Draggable : MonoBehaviour
             unit.currentNode = Pathfinding.Instance.GetNode(transform.localPosition);
             Pathfinding.Instance.GetNode(spriteStartPos).isOccupied = false;
         }
+
+        if(unit.trait != Traits.HERO) GameManager.Instance.trash.SetActive(false);
     }
 }

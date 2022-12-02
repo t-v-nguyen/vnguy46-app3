@@ -22,7 +22,7 @@ public class Unit : UnitMovement
     protected bool canAttack = true;
     private float timeUntilAttack;
     protected bool targetInRange => target != null && Vector3.Distance(this.transform.position, target.transform.position) <= range;
-    
+
 
     private void Start()
     {
@@ -54,34 +54,47 @@ public class Unit : UnitMovement
         }
     }
 
-    private void TakeDamage(int damage)
+    private void TakeDamage(int damage, Unit damageDealer)
     {
         currentHealth -= damage;
-        float scale = ((float)currentHealth)/maxHealth;
+        float scale = ((float)currentHealth) / maxHealth;
         healthBar.transform.localScale = new Vector3(scale, 1, 0);
-        if(currentHealth <= 0)
+        if (currentHealth <= 0)
         {
-            GameManager.Instance.RemoveUnit(this);
+            if(trait == Traits.HERO)
+            {
+                damageDealer.target = null;
+                gameObject.SetActive(false);
+                Pathfinding.Instance.GetNode(currentNode).isOccupied = false;
+                GameManager.Instance.playerUnits.Remove(this);
+            }
+            else
+            {
+                GameManager.Instance.RemoveUnit(this);
+            }
         }
     }
 
     public void Update()
     {
-        if (target == null)
+        if (GameManager.Instance.isRoundPrep == false)
         {
-            unitMovement.FindClosestTarget(team);
-        }
-        if (targetInRange && !isMoving)
-        {
-            if (canAttack)
+            if (target == null)
             {
-                Attack();
-                target.TakeDamage(damage);
+                unitMovement.FindClosestTarget(team);
             }
-        }
-        else
-        {
-            unitMovement.GetInRange();
+            if (targetInRange && !isMoving)
+            {
+                if (canAttack)
+                {
+                    Attack();
+                    target.TakeDamage(damage, this);
+                }
+            }
+            else
+            {
+                unitMovement.GetInRange();
+            }
         }
     }
 
@@ -89,6 +102,26 @@ public class Unit : UnitMovement
     {
         maxHealth += 20;
         damage += 2;
+    }
+
+    public void HealUnit()
+    {
+        currentHealth = maxHealth;
+        healthBar.transform.localScale = new Vector3(1, 1, 0);
+    }
+
+    public int GetCurrentHealth()
+    {
+        return currentHealth;
+    }
+
+    public void RelocateUnit(PathNode node)
+    {
+        Pathfinding.Instance.GetNode(currentNode).isOccupied = false;
+        this.currentNode = node;
+        transform.position = Pathfinding.Instance.GetWorldPosition(currentNode);
+        currentNode.SetIsOccupied(true);
+        HealUnit();
     }
 
 

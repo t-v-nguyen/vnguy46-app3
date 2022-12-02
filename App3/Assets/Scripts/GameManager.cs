@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour
 {
     public List<Unit> purchasableUnits = new List<Unit>();
     public List<Unit> heroUnits = new List<Unit>();
+    public List<Unit> allEnemyUnits = new List<Unit>();
     public List<Unit> playerUnits = new List<Unit>();
     public List<Unit> enemyUnits = new List<Unit>();
     public Dictionary<string, int> traitsRaces = new Dictionary<string, int>();
@@ -25,6 +26,7 @@ public class GameManager : MonoBehaviour
     public TMP_Text currencyText;
     public TMP_Text totalUnits;
     public TMP_Text currentLevel;
+    public TMP_Text roundText;
     private Unit randomUnit;
     public Image unitImage;
     public TMP_Text randomUnitName;
@@ -32,6 +34,7 @@ public class GameManager : MonoBehaviour
     public TMP_Text bonusesText;
     private List<string> twoBonus = new List<string> { Traits.WARRIOR.ToString(), Traits.RANGER.ToString(), Traits.KNIGHT.ToString() };
     public GameObject allUnitObjects;
+    public GameObject trash;
 
     public static GameManager Instance { get; private set; }
     private void Awake()
@@ -60,12 +63,24 @@ public class GameManager : MonoBehaviour
         heroSelectPanel.SetActive(true);
         playFieldPanel.SetActive(false);
         isRoundPrep = true;
+        trash.SetActive(false);
     }
 
     public void Update()
     {
         currencyText.text = currency.ToString();
         totalUnits.text = playerUnits.Count + "/" + heroLevel + " Units";
+        if (!isRoundPrep)
+        {
+            if (enemyUnits.Count <= 0)
+            {
+                EndRound(round);
+            }
+            if (playerUnits.Count <= 0)
+            {
+                GameOver();
+            }
+        }
     }
 
     private void DrawBoard()
@@ -109,12 +124,33 @@ public class GameManager : MonoBehaviour
         if (unit.team == Teams.Player)
         {
             playerUnits.Remove(unit);
+            if (traitsRaces.TryGetValue(unit.trait.ToString(), out int val1))
+            {
+                if (val1 <= 1) traitsRaces.Remove(unit.trait.ToString());
+                else
+                {
+
+                    traitsRaces[unit.trait.ToString()] = val1 - 1;
+                }
+
+            }
+
+            if (traitsRaces.TryGetValue(unit.race.ToString(), out int val2))
+            {
+                if (val2 <= 1) traitsRaces.Remove(unit.race.ToString());
+                else
+                {
+
+                    traitsRaces[unit.race.ToString()] = val2 - 1;
+                }
+            }
+            UpdateBonusesText();
         }
         if (unit.team == Teams.Enemy)
         {
             enemyUnits.Remove(unit);
         }
-
+        pathfinding.GetNode(unit.transform.position).isOccupied = false;
         Destroy(unit.gameObject);
     }
 
@@ -131,6 +167,7 @@ public class GameManager : MonoBehaviour
         traitsRaces.Add(hero.trait.ToString(), 1);
         traitsRaces.Add(hero.race.ToString(), 1);
         UpdateBonusesText();
+        SetUpRound(round);
     }
     public void SelectOrcHero()
     {
@@ -145,6 +182,7 @@ public class GameManager : MonoBehaviour
         traitsRaces.Add(hero.trait.ToString(), 1);
         traitsRaces.Add(hero.race.ToString(), 1);
         UpdateBonusesText();
+        SetUpRound(round);
     }
     public void SelectHumanHero()
     {
@@ -159,6 +197,7 @@ public class GameManager : MonoBehaviour
         traitsRaces.Add(hero.trait.ToString(), 1);
         traitsRaces.Add(hero.race.ToString(), 1);
         UpdateBonusesText();
+        SetUpRound(round);
     }
     public void SelectElfHero()
     {
@@ -173,6 +212,7 @@ public class GameManager : MonoBehaviour
         traitsRaces.Add(hero.trait.ToString(), 1);
         traitsRaces.Add(hero.race.ToString(), 1);
         UpdateBonusesText();
+        SetUpRound(round);
     }
 
     public void LevelUp()
@@ -300,6 +340,7 @@ public class GameManager : MonoBehaviour
         if (randomUnit == null) return;
         if (randomUnit.cost > currency) return;
         if (playerUnits.Count >= heroLevel) return;
+        if (!isRoundPrep) return;
         currency -= randomUnit.cost;
         Unit newUnit = Instantiate(randomUnit);
         newUnit.transform.SetParent(allUnitObjects.transform);
@@ -359,6 +400,51 @@ public class GameManager : MonoBehaviour
 
         return true;
     }
+
+    public void StartRound()
+    {
+        isRoundPrep = false;
+    }
+
+    public void SetUpRound(int roundNum)
+    {
+        if (roundNum == 1)
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                Unit newUnit = Instantiate(allEnemyUnits[0]);
+                newUnit.transform.SetParent(allUnitObjects.transform);
+                enemyUnits.Add(newUnit);
+                newUnit.Setup(Teams.Enemy, pathfinding.GetRandomUnoccupiedNode(Teams.Enemy));
+            }
+        }
+    }
+
+    public void EndRound(int roundNum)
+    {
+        round++;
+        isRoundPrep = true;
+        roundText.text = "Round " + round;
+        if (hero.GetCurrentHealth() <= 0)
+        {
+            playerUnits.Add(hero);
+            hero.gameObject.SetActive(true);
+        }
+
+        foreach(Unit unit in playerUnits)
+        {
+            unit.RelocateUnit(pathfinding.GetUnoccupiedNode(Teams.Player));
+        }
+
+
+
+    }
+
+    public void GameOver()
+    {
+        isRoundPrep = true;
+        Debug.Log("gameover");
+    }
 }
 
 public enum Teams
@@ -372,7 +458,8 @@ public enum Races
     ELF,
     HUMAN,
     ORC,
-    VAMPIRE
+    VAMPIRE,
+    ENEMY
 }
 
 public enum Traits
@@ -381,5 +468,6 @@ public enum Traits
     RANGER,
     DRUID,
     KNIGHT,
-    HERO
+    HERO,
+    ENEMY
 }
