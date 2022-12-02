@@ -10,7 +10,7 @@ public class Unit : UnitMovement
     public int cost;
     public GameObject healthBar;
     public int damage = 10;
-    private int currentHealth = 100;
+    private int currentHealth;
     public int maxHealth = 100;
     public int range = 60;
     public float AS = 1f; // Attack speed
@@ -35,7 +35,7 @@ public class Unit : UnitMovement
         this.currentNode = spawnNode;
         transform.position = Pathfinding.Instance.GetWorldPosition(currentNode);
         currentNode.SetIsOccupied(true);
-        maxHealth = currentHealth;
+        currentHealth = maxHealth;
     }
 
     protected void Attack()
@@ -83,6 +83,12 @@ public class Unit : UnitMovement
         {
             unitMovement.GetInRange();
         }
+    }
+
+    public void UpgradeHero()
+    {
+        maxHealth += 20;
+        damage += 2;
     }
 
 
