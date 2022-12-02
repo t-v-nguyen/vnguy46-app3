@@ -31,6 +31,7 @@ public class GameManager : MonoBehaviour
     public TMP_Text randomUnitCost;
     public TMP_Text bonusesText;
     private List<string> twoBonus = new List<string> { Traits.WARRIOR.ToString(), Traits.RANGER.ToString(), Traits.KNIGHT.ToString() };
+    public GameObject allUnitObjects;
 
     public static GameManager Instance { get; private set; }
     private void Awake()
@@ -120,6 +121,7 @@ public class GameManager : MonoBehaviour
     public void SelectVampireHero()
     {
         Unit newUnit = Instantiate(heroUnits[3]);
+        newUnit.transform.SetParent(allUnitObjects.transform);
         hero = newUnit;
         playerUnits.Add(newUnit);
         newUnit.Setup(Teams.Player, pathfinding.GetUnoccupiedNode(Teams.Player));
@@ -133,6 +135,7 @@ public class GameManager : MonoBehaviour
     public void SelectOrcHero()
     {
         Unit newUnit = Instantiate(heroUnits[2]);
+        newUnit.transform.SetParent(allUnitObjects.transform);
         hero = newUnit;
         playerUnits.Add(newUnit);
         newUnit.Setup(Teams.Player, pathfinding.GetUnoccupiedNode(Teams.Player));
@@ -146,6 +149,7 @@ public class GameManager : MonoBehaviour
     public void SelectHumanHero()
     {
         Unit newUnit = Instantiate(heroUnits[1]);
+        newUnit.transform.SetParent(allUnitObjects.transform);
         hero = newUnit;
         playerUnits.Add(newUnit);
         newUnit.Setup(Teams.Player, pathfinding.GetUnoccupiedNode(Teams.Player));
@@ -159,6 +163,7 @@ public class GameManager : MonoBehaviour
     public void SelectElfHero()
     {
         Unit newUnit = Instantiate(heroUnits[0]);
+        newUnit.transform.SetParent(allUnitObjects.transform);
         hero = newUnit;
         playerUnits.Add(newUnit);
         newUnit.Setup(Teams.Player, pathfinding.GetUnoccupiedNode(Teams.Player));
@@ -297,6 +302,7 @@ public class GameManager : MonoBehaviour
         if (playerUnits.Count >= heroLevel) return;
         currency -= randomUnit.cost;
         Unit newUnit = Instantiate(randomUnit);
+        newUnit.transform.SetParent(allUnitObjects.transform);
         if (IsUnitUnique(newUnit))
         {
             if (traitsRaces.TryGetValue(newUnit.trait.ToString(), out int val1))
