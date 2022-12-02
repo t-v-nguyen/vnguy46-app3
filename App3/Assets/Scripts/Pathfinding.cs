@@ -240,4 +240,10 @@ public class Pathfinding
         return grid.GetWorldPosition(node.x, node.y) + new Vector3(grid.GetCellSize() / 2, grid.GetCellSize() / 2);
     }
 
+    public Vector3 GetWorldPosition(Vector3 worldPos)
+    {
+        grid.GetXY(worldPos, out int x, out int y);
+        return grid.GetWorldPosition(x, y) + new Vector3(grid.GetCellSize() / 2, grid.GetCellSize() / 2);;
+    }
+
 }

@@ -16,7 +16,7 @@ public class GameManager : MonoBehaviour
     public int round = 1;
     public int currency = 0;
     private Pathfinding pathfinding;
-    public bool roundStarted;
+    public bool isRoundPrep;
     public GameObject square;
     private GameObject heroSelectPanel;
     private GameObject playFieldPanel;
@@ -58,7 +58,7 @@ public class GameManager : MonoBehaviour
         playFieldPanel = GameObject.Find("PlayField");
         heroSelectPanel.SetActive(true);
         playFieldPanel.SetActive(false);
-        roundStarted = false;
+        isRoundPrep = true;
     }
 
     public void Update()
