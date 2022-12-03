@@ -246,4 +246,15 @@ public class Pathfinding
         return grid.GetWorldPosition(x, y) + new Vector3(grid.GetCellSize() / 2, grid.GetCellSize() / 2);;
     }
 
+    public void RefreshNodeOccupation()
+    {
+        for (int x = 0; x < grid.GetWidth(); x++)
+            {
+                for (int y = 0; y < grid.GetHeight(); y++)
+                {
+                    GetNode(x,y).isOccupied = false;
+                }
+            }
+    }
+
 }

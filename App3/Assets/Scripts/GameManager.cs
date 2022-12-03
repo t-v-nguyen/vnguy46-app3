@@ -527,6 +527,7 @@ public class GameManager : MonoBehaviour
 
     public void EndRound(int roundNum)
     {
+        pathfinding.RefreshNodeOccupation();
         round++;
         isRoundPrep = true;
         roundText.text = "Round " + round;
