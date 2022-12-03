@@ -70,7 +70,7 @@ MonoBehaviour:
   cost: 2
   healthBar: {fileID: 4121042552741506972}
   damage: 10
-  maxHealth: 160
+  maxHealth: 180
   range: 30
   AS: 10
   MS: 10

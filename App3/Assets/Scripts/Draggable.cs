@@ -19,7 +19,7 @@ public class Draggable : MonoBehaviour
         isDragged = true;
         mouseStartPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         spriteStartPos = transform.localPosition;
-        if(unit.trait != Traits.HERO)GameManager.Instance.trash.SetActive(true);
+        if(unit.trait != Traits.HERO && unit.trait != Traits.ENEMY)GameManager.Instance.trash.SetActive(true);
     }
 
     public void OnMouseDrag()
@@ -35,8 +35,9 @@ public class Draggable : MonoBehaviour
     {
         isDragged = false;
         
-        if(unit.trait != Traits.HERO && Vector3.Distance(GameManager.Instance.trash.transform.position, transform.position) < 15)
+        if(unit.trait != Traits.HERO && unit.trait != Traits.ENEMY && Vector3.Distance(GameManager.Instance.trash.transform.position, transform.position) < 15)
         {
+            GameManager.Instance.trash.SetActive(false);
             Pathfinding.Instance.GetNode(spriteStartPos).isOccupied = false;
             GameManager.Instance.RemoveUnit(unit);
             return;
@@ -57,6 +58,6 @@ public class Draggable : MonoBehaviour
             Pathfinding.Instance.GetNode(spriteStartPos).isOccupied = false;
         }
 
-        if(unit.trait != Traits.HERO) GameManager.Instance.trash.SetActive(false);
+        if(unit.trait != Traits.HERO && unit.trait != Traits.ENEMY) GameManager.Instance.trash.SetActive(false);
     }
 }

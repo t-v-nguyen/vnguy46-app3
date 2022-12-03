@@ -13,6 +13,7 @@ public class GameManager : MonoBehaviour
     public List<Unit> playerUnits = new List<Unit>();
     public List<Unit> enemyUnits = new List<Unit>();
     public Dictionary<string, int> traitsRaces = new Dictionary<string, int>();
+    public List<string> activeTraitsRaces = new List<string>();
     public int heroLevel = 1;
     public int round = 1;
     public int currency = 0;
@@ -35,6 +36,9 @@ public class GameManager : MonoBehaviour
     private List<string> twoBonus = new List<string> { Traits.WARRIOR.ToString(), Traits.RANGER.ToString(), Traits.KNIGHT.ToString() };
     public GameObject allUnitObjects;
     public GameObject trash;
+    private Unit golem;
+    private bool activatedOrc;
+    public bool gameOver = false;
 
     public static GameManager Instance { get; private set; }
     private void Awake()
@@ -56,7 +60,7 @@ public class GameManager : MonoBehaviour
         pathfinding = new Pathfinding(8, 8, 20f);
         heroLevel = 1;
         round = 1;
-        currency = 100;
+        currency = 8;
         currencyText.text = currency.ToString();
         heroSelectPanel = GameObject.Find("HeroSelection");
         playFieldPanel = GameObject.Find("PlayField");
@@ -64,6 +68,7 @@ public class GameManager : MonoBehaviour
         playFieldPanel.SetActive(false);
         isRoundPrep = true;
         trash.SetActive(false);
+        activatedOrc = false;
     }
 
     public void Update()
@@ -121,6 +126,7 @@ public class GameManager : MonoBehaviour
 
     public void RemoveUnit(Unit unit)
     {
+        pathfinding.GetNode(unit.currentNode.x, unit.currentNode.y).isOccupied = false;
         if (unit.team == Teams.Player)
         {
             playerUnits.Remove(unit);
@@ -129,7 +135,6 @@ public class GameManager : MonoBehaviour
                 if (val1 <= 1) traitsRaces.Remove(unit.trait.ToString());
                 else
                 {
-
                     traitsRaces[unit.trait.ToString()] = val1 - 1;
                 }
 
@@ -144,13 +149,12 @@ public class GameManager : MonoBehaviour
                     traitsRaces[unit.race.ToString()] = val2 - 1;
                 }
             }
-            UpdateBonusesText();
+            UpdateBonuses();
         }
         if (unit.team == Teams.Enemy)
         {
             enemyUnits.Remove(unit);
         }
-        pathfinding.GetNode(unit.transform.position).isOccupied = false;
         Destroy(unit.gameObject);
     }
 
@@ -166,7 +170,7 @@ public class GameManager : MonoBehaviour
         DrawBoard();
         traitsRaces.Add(hero.trait.ToString(), 1);
         traitsRaces.Add(hero.race.ToString(), 1);
-        UpdateBonusesText();
+        UpdateBonuses();
         SetUpRound(round);
     }
     public void SelectOrcHero()
@@ -181,7 +185,7 @@ public class GameManager : MonoBehaviour
         DrawBoard();
         traitsRaces.Add(hero.trait.ToString(), 1);
         traitsRaces.Add(hero.race.ToString(), 1);
-        UpdateBonusesText();
+        UpdateBonuses();
         SetUpRound(round);
     }
     public void SelectHumanHero()
@@ -196,7 +200,7 @@ public class GameManager : MonoBehaviour
         DrawBoard();
         traitsRaces.Add(hero.trait.ToString(), 1);
         traitsRaces.Add(hero.race.ToString(), 1);
-        UpdateBonusesText();
+        UpdateBonuses();
         SetUpRound(round);
     }
     public void SelectElfHero()
@@ -211,7 +215,7 @@ public class GameManager : MonoBehaviour
         DrawBoard();
         traitsRaces.Add(hero.trait.ToString(), 1);
         traitsRaces.Add(hero.race.ToString(), 1);
-        UpdateBonusesText();
+        UpdateBonuses();
         SetUpRound(round);
     }
 
@@ -219,6 +223,7 @@ public class GameManager : MonoBehaviour
     {
         if (heroLevel < 6)
         {
+            if(currency < Convert.ToInt32(Math.Floor(((Math.Pow(heroLevel, 2)) / 2) + 4))) return;
             currency -= Convert.ToInt32(Math.Floor(((Math.Pow(heroLevel, 2)) / 2) + 4));
             heroLevel++;
             hero.UpgradeHero();
@@ -364,9 +369,9 @@ public class GameManager : MonoBehaviour
                 traitsRaces.Add(newUnit.race.ToString(), 1);
             }
         }
-        UpdateBonusesText();
         playerUnits.Add(newUnit);
         newUnit.Setup(Teams.Player, pathfinding.GetUnoccupiedNode(Teams.Player));
+        UpdateBonuses();
 
         randomUnit = null;
         randomUnitCost.text = "0";
@@ -374,7 +379,7 @@ public class GameManager : MonoBehaviour
         unitImage.sprite = null;
     }
 
-    private void UpdateBonusesText()
+    private void UpdateBonuses()
     {
         string text = "";
         foreach (KeyValuePair<string, int> bonus in traitsRaces)
@@ -383,6 +388,60 @@ public class GameManager : MonoBehaviour
             else
             {
                 text += bonus.Key + " " + bonus.Value + "/" + (twoBonus.Contains(bonus.Key.ToString()) ? "2" : "3") + "\n";
+
+                if (twoBonus.Contains(bonus.Key.ToString()) && bonus.Value >= 2) activeTraitsRaces.Add(bonus.Key);
+                else if (bonus.Value >= 3)
+                {
+                    activeTraitsRaces.Add(bonus.Key);
+                }
+
+                if (twoBonus.Contains(bonus.Key.ToString()) && bonus.Value < 2 && activeTraitsRaces.Contains(bonus.Key)) activeTraitsRaces.Remove(bonus.Key);
+                else if (bonus.Value < 3 && activeTraitsRaces.Contains(bonus.Key))
+                {
+                    activeTraitsRaces.Remove(bonus.Key);
+                }
+            }
+        }
+
+
+        if (activeTraitsRaces.Contains(Races.ORC.ToString()))
+        {
+            if(activatedOrc == false)
+            {
+                foreach (Unit unit in playerUnits)
+                {
+                    if (unit.race == Races.ORC)
+                    {
+                        unit.OrcTrait(true);
+                    }
+                }
+            }
+            activatedOrc = true;
+        }
+        else
+        {
+            if (activatedOrc == true)
+            {
+                foreach (Unit unit in playerUnits)
+                {
+                    if (unit.race == Races.ORC) unit.OrcTrait(false);
+                }
+                activatedOrc = false;
+            }
+        }
+        if (activeTraitsRaces.Contains(Traits.DRUID.ToString()))
+        {
+            Unit newUnit = Instantiate(purchasableUnits[purchasableUnits.Count - 1]);
+            golem = newUnit;
+            newUnit.transform.SetParent(allUnitObjects.transform);
+            playerUnits.Add(newUnit);
+            newUnit.Setup(Teams.Player, pathfinding.GetUnoccupiedNode(Teams.Player));
+        }
+        else
+        {
+            if (golem != null)
+            {
+                RemoveUnit(golem);
             }
         }
         bonusesText.text = text;
@@ -408,15 +467,61 @@ public class GameManager : MonoBehaviour
 
     public void SetUpRound(int roundNum)
     {
-        if (roundNum == 1)
+
+        switch (roundNum)
         {
-            for (int i = 0; i < 3; i++)
-            {
-                Unit newUnit = Instantiate(allEnemyUnits[0]);
-                newUnit.transform.SetParent(allUnitObjects.transform);
-                enemyUnits.Add(newUnit);
-                newUnit.Setup(Teams.Enemy, pathfinding.GetRandomUnoccupiedNode(Teams.Enemy));
-            }
+            case 1:
+                for (int i = 0; i < 5; i++)
+                {
+                    Unit newUnit = Instantiate(allEnemyUnits[0]);
+                    newUnit.transform.SetParent(allUnitObjects.transform);
+                    enemyUnits.Add(newUnit);
+                    newUnit.Setup(Teams.Enemy, pathfinding.GetRandomUnoccupiedNode(Teams.Enemy));
+                }
+                break;
+            case 2:
+                for (int i = 0; i < 4; i++)
+                {
+                    Unit newUnit = Instantiate(allEnemyUnits[1]);
+                    newUnit.transform.SetParent(allUnitObjects.transform);
+                    enemyUnits.Add(newUnit);
+                    newUnit.Setup(Teams.Enemy, pathfinding.GetNode(i + 2, 4));
+                }
+                break;
+            case 3:
+                for (int i = 0; i < 3; i++)
+                {
+                    Unit newUnit = Instantiate(allEnemyUnits[2]);
+                    newUnit.transform.SetParent(allUnitObjects.transform);
+                    enemyUnits.Add(newUnit);
+                    newUnit.Setup(Teams.Enemy, pathfinding.GetNode(i + 3, 4));
+                }
+                for (int i = 0; i < 2; i++)
+                {
+                    Unit newUnit = Instantiate(allEnemyUnits[3]);
+                    newUnit.transform.SetParent(allUnitObjects.transform);
+                    enemyUnits.Add(newUnit);
+                    newUnit.Setup(Teams.Enemy, pathfinding.GetNode(i + 3, 7));
+                }
+                break;
+            case 4:
+                for (int i = 0; i < 2; i++)
+                {
+                    Unit newUnit = Instantiate(allEnemyUnits[4]);
+                    newUnit.transform.SetParent(allUnitObjects.transform);
+                    enemyUnits.Add(newUnit);
+                    newUnit.Setup(Teams.Enemy, pathfinding.GetRandomUnoccupiedNode(Teams.Enemy));
+                }
+                break;
+            case 5:
+                for (int i = 0; i < 1; i++)
+                {
+                    Unit newUnit = Instantiate(allEnemyUnits[5]);
+                    newUnit.transform.SetParent(allUnitObjects.transform);
+                    enemyUnits.Add(newUnit);
+                    newUnit.Setup(Teams.Enemy, pathfinding.GetRandomUnoccupiedNode(Teams.Enemy));
+                }
+                break;
         }
     }
 
@@ -430,20 +535,35 @@ public class GameManager : MonoBehaviour
             playerUnits.Add(hero);
             hero.gameObject.SetActive(true);
         }
-
-        foreach(Unit unit in playerUnits)
+        foreach (Unit unit in playerUnits)
         {
             unit.RelocateUnit(pathfinding.GetUnoccupiedNode(Teams.Player));
         }
 
-
-
+        switch (roundNum)
+        {
+            case 1:
+                currency += 10;
+                break;
+            case 2:
+                currency += 15;
+                break;
+            case 3:
+                currency += 20;
+                break;
+            case 4:
+                currency += 25;
+                break;
+            case 5:
+                currency += 30;
+                break;
+        }
+        SetUpRound(round);
     }
 
     public void GameOver()
     {
-        isRoundPrep = true;
-        Debug.Log("gameover");
+        gameOver = true;
     }
 }
 

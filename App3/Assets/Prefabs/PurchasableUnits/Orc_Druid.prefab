@@ -153,10 +153,10 @@ MonoBehaviour:
   race: 2
   cost: 1
   healthBar: {fileID: 4121042552741506972}
-  damage: 8
+  damage: 3
   maxHealth: 90
   range: 60
-  AS: 10
+  AS: 6
   MS: 10
   team: 0
   target: {fileID: 0}

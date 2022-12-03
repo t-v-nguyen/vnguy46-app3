@@ -19,7 +19,7 @@ public class UnitMovement : MonoBehaviour
     private bool MoveToNode(Vector3 location)
     {
         Vector3 moveDir = (location - transform.position);
-        if (moveDir.sqrMagnitude <= 0.05f)
+        if (moveDir.sqrMagnitude <= 0.05f) // reach destination
         {
             transform.position = location;
             return true;
@@ -67,9 +67,9 @@ public class UnitMovement : MonoBehaviour
         if (pathVectorList == null || pathVectorList.Count <= 1) return;
 
         if (Pathfinding.Instance.GetNode(pathVectorList[1]).isOccupied) return;
-
         Pathfinding.Instance.GetNode(pathVectorList[1]).SetIsOccupied(true);
         destination = pathVectorList[1];
+        
     }
 
     public void FindClosestTarget(Teams team)

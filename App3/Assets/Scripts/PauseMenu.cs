@@ -9,6 +9,7 @@ public class PauseMenu : MonoBehaviour
     public GameObject pauseUI;
     public GameObject helpUI;
     public GameObject traitsRacesUI;
+    public GameObject gameOverUI;
 
     public GameObject grid;
     public GameObject units;
@@ -25,6 +26,12 @@ public class PauseMenu : MonoBehaviour
             {
                 Pause();
             }
+        }
+        if (GameManager.Instance.gameOver == true)
+        {
+            gameOverUI.SetActive(true);
+            units.SetActive(false);
+            grid.SetActive(false);
         }
     }
 
@@ -69,5 +76,10 @@ public class PauseMenu : MonoBehaviour
     public void Exit()
     {
         SceneManager.LoadScene("MainMenu");
+    }
+
+    public void Restart()
+    {
+        SceneManager.LoadScene("ArtofWar");
     }
 }

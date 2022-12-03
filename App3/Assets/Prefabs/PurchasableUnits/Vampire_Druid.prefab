@@ -156,7 +156,7 @@ MonoBehaviour:
   damage: 15
   maxHealth: 190
   range: 60
-  AS: 10
+  AS: 6
   MS: 10
   team: 0
   target: {fileID: 0}
