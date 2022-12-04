@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class PauseMenu : MonoBehaviour
 {
@@ -10,6 +11,7 @@ public class PauseMenu : MonoBehaviour
     public GameObject helpUI;
     public GameObject traitsRacesUI;
     public GameObject gameOverUI;
+    public GameObject gameWinUI;
 
     public GameObject grid;
     public GameObject units;
@@ -27,9 +29,15 @@ public class PauseMenu : MonoBehaviour
                 Pause();
             }
         }
-        if (GameManager.Instance.gameOver == true)
+        if (GameManager.Instance.gameLose == true)
         {
             gameOverUI.SetActive(true);
+            units.SetActive(false);
+            grid.SetActive(false);
+        }
+        if (GameManager.Instance.gameWin == true)
+        {
+            gameWinUI.SetActive(true);
             units.SetActive(false);
             grid.SetActive(false);
         }

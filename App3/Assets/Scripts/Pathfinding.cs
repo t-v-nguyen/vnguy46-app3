@@ -75,7 +75,7 @@ public class Pathfinding
             foreach (PathNode neighbour in GetNeighbourList(currentNode))
             {
                 if (closeList.Contains(neighbour)) continue;
-                if (neighbour != endNode && neighbour.isOccupied )
+                if (neighbour != endNode && neighbour.isOccupied)
                 {
                     closeList.Add(neighbour);
                     continue;
@@ -210,9 +210,9 @@ public class Pathfinding
     {
         bool allOccupied = true;
         List<PathNode> neighbourList = GetNeighbourList(targetNode);
-        foreach(PathNode neighbour in neighbourList)
+        foreach (PathNode neighbour in neighbourList)
         {
-            if(!neighbour.isOccupied) allOccupied = false;
+            if (!neighbour.isOccupied) allOccupied = false;
         }
         return allOccupied;
     }
@@ -243,18 +243,18 @@ public class Pathfinding
     public Vector3 GetWorldPosition(Vector3 worldPos)
     {
         grid.GetXY(worldPos, out int x, out int y);
-        return grid.GetWorldPosition(x, y) + new Vector3(grid.GetCellSize() / 2, grid.GetCellSize() / 2);;
+        return grid.GetWorldPosition(x, y) + new Vector3(grid.GetCellSize() / 2, grid.GetCellSize() / 2); 
     }
 
     public void RefreshNodeOccupation()
     {
         for (int x = 0; x < grid.GetWidth(); x++)
+        {
+            for (int y = 0; y < grid.GetHeight(); y++)
             {
-                for (int y = 0; y < grid.GetHeight(); y++)
-                {
-                    GetNode(x,y).isOccupied = false;
-                }
+                GetNode(x, y).isOccupied = false;
             }
+        }
     }
 
 }

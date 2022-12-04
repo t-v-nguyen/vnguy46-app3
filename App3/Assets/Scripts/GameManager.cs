@@ -38,7 +38,8 @@ public class GameManager : MonoBehaviour
     public GameObject trash;
     private Unit golem;
     private bool activatedOrc;
-    public bool gameOver = false;
+    public bool gameLose = false;
+    public bool gameWin = false;
 
     public static GameManager Instance { get; private set; }
     private void Awake()
@@ -496,7 +497,7 @@ public class GameManager : MonoBehaviour
                     enemyUnits.Add(newUnit);
                     newUnit.Setup(Teams.Enemy, pathfinding.GetNode(i + 3, 4));
                 }
-                for (int i = 0; i < 2; i++)
+                for (int i = 0; i < 3; i++)
                 {
                     Unit newUnit = Instantiate(allEnemyUnits[3]);
                     newUnit.transform.SetParent(allUnitObjects.transform);
@@ -558,13 +559,16 @@ public class GameManager : MonoBehaviour
             case 5:
                 currency += 30;
                 break;
+            case 6:
+                gameWin = true;
+                break;
         }
         SetUpRound(round);
     }
 
     public void GameOver()
     {
-        gameOver = true;
+        gameLose = true;
     }
 }
 
